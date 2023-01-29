@@ -3,14 +3,62 @@ import { v4 as uuidv4 } from "uuid";
 
 import knex from "./database/knex";
 
+type CreditCard = {
+  id: string;
+  linked_user_full_name: string;
+  card_number: string;
+  limit: number;
+  card_provider: string;
+};
+
 const app = express();
 
 const PORT = 5000;
 
 start_server();
 
+app.use(express.json());
+
 app.get("/", async (_req: Request, res: Response) => {
   return res.send("Rest API is operational!");
+});
+
+app.get("/add", async (req: Request, res: Response) => {
+  const id = uuidv4();
+  try {
+    const data = await knex<CreditCard>("credit_cards")
+      .insert({
+        ...req.body,
+        id,
+      })
+      .returning("id"); // only return the uuid so as to not expose PII unless needed
+    return res.send({
+      data,
+      message: "credit card details added successfully",
+      status: 200,
+    });
+  } catch (e) {
+    return res.send({
+      e,
+      message: "Something went wrong",
+      status: 500,
+    });
+  }
+});
+
+app.get("/get-all", async (_req: Request, res: Response) => {
+  try {
+    const data = await knex("credit_cards");
+    const message =
+      data.length > 0 ? `${data.length} card data found` : "No card data found";
+    return res.send({ message, data });
+  } catch (e) {
+    return res.send({
+      e,
+      message: "Something went wrong",
+      status: 500,
+    });
+  }
 });
 
 async function start_server() {
