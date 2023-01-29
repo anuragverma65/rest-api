@@ -1,7 +1,14 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
+import { validationResult } from "express-validator";
 import { v4 as uuidv4 } from "uuid";
 
 import knex from "./database/knex";
+import {
+  validateCreateCardInputs,
+  validateDeleteInput,
+  validateGetQueryParams,
+  validateUpdateInput,
+} from "./validator";
 
 type CreditCard = {
   id: string;
@@ -23,28 +30,37 @@ app.get("/", async (_req: Request, res: Response) => {
   return res.send("Rest API is operational!");
 });
 
-app.post("/add", async (req: Request, res: Response) => {
-  const id = uuidv4();
-  try {
-    const data = await knex<CreditCard>("credit_cards")
-      .insert({
-        ...req.body,
-        id,
-      })
-      .returning("id"); // only return the uuid so as to not expose PII unless needed
-    return res.send({
-      data,
-      message: "credit card details added successfully",
-      status: 200,
-    });
-  } catch (e) {
-    return res.send({
-      e,
-      message: "Something went wrong",
-      status: 500,
-    });
+app.post(
+  "/add",
+  validateCreateCardInputs(),
+  (req: Request, res: Response, next: NextFunction) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res
+        .status(400)
+        .json({ error, message: "invalid card data supplied" });
+    }
+    next();
+  },
+  async (req: Request, res: Response) => {
+    const id = uuidv4();
+    try {
+      const data = await knex<CreditCard>("credit_cards")
+        .insert({
+          ...req.body,
+          id,
+        })
+        .returning("id"); // only return the uuid so as to not expose PII unless needed
+      return res.send({
+        data,
+        message: "credit card details added successfully",
+        status: 200,
+      });
+    } catch (e) {
+      return res.status(500).json({ e, message: "Something went wrong" });
+    }
   }
-});
+);
 
 app.get("/get-all", async (_req: Request, res: Response) => {
   try {
@@ -53,69 +69,94 @@ app.get("/get-all", async (_req: Request, res: Response) => {
       data.length > 0 ? `${data.length} card data found` : "No card data found";
     return res.send({ message, data });
   } catch (e) {
-    return res.send({
-      e,
-      message: "Something went wrong",
-      status: 500,
-    });
+    return res.status(500).json({ e, message: "Something went wrong" });
   }
 });
 
-app.patch("/update", async (req: Request, res: Response) => {
-  try {
+app.patch(
+  "/update",
+  validateUpdateInput(),
+  (req: Request, res: Response, next: NextFunction) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res
+        .status(400)
+        .json({ error, message: "invalid card data supplied" });
+    }
+    next();
+  },
+  async (req: Request, res: Response) => {
+    try {
+      const id = req.body.id;
+      const limit = req.body.limit;
+      const data = await knex<CreditCard>("credit_cards")
+        .update({ limit })
+        .where("id", id)
+        .returning("limit");
+      const message = "card limit updated successfully!";
+      return res.send({ message, data });
+    } catch (e) {
+      return res.status(500).json({ e, message: "Something went wrong" });
+    }
+  }
+);
+
+app.delete(
+  "/delete",
+  validateDeleteInput(),
+  (req: Request, res: Response, next: NextFunction) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res
+        .status(400)
+        .json({ error, message: "invalid card data supplied" });
+    }
+    next();
+  },
+  async (req: Request, res: Response) => {
     const id = req.body.id;
-    const limit = req.body.limit;
-    const data = await knex<CreditCard>("credit_cards")
-      .update({ limit })
-      .where("id", id)
-      .returning("limit");
-    const message = "card limit updated successfully!";
-    return res.send({ message, data });
-  } catch (e) {
-    return res.send({
-      e,
-      message: "Something went wrong",
-      status: 500,
-    });
+    try {
+      const data = await knex<CreditCard>("credit_cards")
+        .where("id", id)
+        .del()
+        .returning("id");
+      const message = "card details deleted successfully!";
+      return res.send({ message, data });
+    } catch (e) {
+      return res.status(500).json({ e, message: "Something went wrong" });
+    }
   }
-});
-
-app.delete("/delete", async (req: Request, res: Response) => {
-  const id = req.body.id;
-  try {
-    const data = await knex<CreditCard>("credit_cards")
-      .where("id", id)
-      .del()
-      .returning("id");
-    const message = "card details deleted successfully!";
-    return res.send({ message, data });
-  } catch (e) {
-    return res.send({
-      e,
-      message: "Something went wrong",
-      status: 500,
-    });
-  }
-});
+);
 
 // Add paginatated route to serve limited data. Default is set to 10
-app.get("/get-cards", async (req: Request, res: Response) => {
-  const id = req.body.id;
-  const dataLimit = (req.query.limit as number | undefined) || 10;
-  const dataOffset = req.query.offset as unknown as number;
-  try {
-    const data = await knex("credit_cards").limit(dataLimit).offset(dataOffset);
-    const message =
-      data.length > 0 ? `${data.length} card data found` : "No card data found";
-    return res.send({ message, data });
-  } catch (e) {
-    return res.send({
-      e,
-      message: "Something went wrong",
-      status: 500,
-    });
+app.get(
+  "/get-cards",
+  validateGetQueryParams(),
+  (req: Request, res: Response, next: NextFunction) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(400).json({ error, message: "invalid query params" });
+    }
+    next();
+  },
+  async (req: Request, res: Response) => {
+    const id = req.body.id;
+    const dataLimit = (req.query.limit as number | undefined) || 10;
+    const dataOffset = req.query.offset as unknown as number;
+    try {
+      const data = await knex("credit_cards")
+        .limit(dataLimit)
+        .offset(dataOffset);
+      const message =
+        data.length > 0
+          ? `${data.length} card data found`
+          : "No card data found";
+      return res.send({ message, data });
+    } catch (e) {
+      return res.status(500).json({ e, message: "Something went wrong" });
+    }
   }
-});
+);
 
 async function start_server() {
   try {
