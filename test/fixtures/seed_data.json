@@ -1,0 +1,36 @@
+[{
+    "id":"eb103315-2269-4f33-a18b-23dbdb42b261",
+    "limit": 1000,
+    "card_number": "5105105105105100",
+    "linked_user_full_name": "Anurag Verma",
+    "card_provider": "Visa"
+  },
+  {
+    "id":"eb103315-2269-4f33-a18b-23dbdb42b262",
+    "limit": 2000,
+    "card_number": "5105105105105100",
+    "linked_user_full_name": "Anurag Verma",
+    "card_provider": "Visa"
+  },
+  {
+    "id":"eb103315-2269-4f33-a18b-23dbdb42b263",
+    "limit": 3000,
+    "card_number": "5105105105105100",
+    "linked_user_full_name": "Anurag Verma",
+    "card_provider": "Visa"
+  },
+  {
+    "id":"eb103315-2269-4f33-a18b-23dbdb42b264",
+    "limit": 4000,
+    "card_number": "5105105105105100",
+    "linked_user_full_name": "Anurag Verma",
+    "card_provider": "Visa"
+  },
+  {
+    "id":"eb103315-2269-4f33-a18b-23dbdb42b265",
+    "limit": 5000,
+    "card_number": "5105105105105100",
+    "linked_user_full_name": "Anurag Verma",
+    "card_provider": "Visa"
+  }
+]

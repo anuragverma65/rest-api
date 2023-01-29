@@ -9,9 +9,9 @@ Sum of all the digits of the individual result i.e. 14 would be 1 + 4
 if the sum is a multiple of 10 then its a valid card number
 */
 
-function validCreditCard(value: string): boolean {
+export const validCreditCard = (value: string): boolean => {
   if (!value || typeof value !== "string") {
-    throw new Error("Input must be a non-empty string");
+    return false;
   }
   // accept only digits, dashes or spaces
   if (/[^0-9-\s]+/.test(value)) return false;
@@ -28,7 +28,7 @@ function validCreditCard(value: string): boolean {
   }, 0);
 
   return checkSum % 10 === 0;
-}
+};
 
 export const validateCreateCardInputs = () => {
   return [

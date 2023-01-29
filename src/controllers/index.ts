@@ -33,7 +33,9 @@ export const getAllCards = async (_req: Request, res: Response) => {
   try {
     const data = await getAllCardsService();
     const message =
-      data.length > 0 ? `${data.length} card data found` : "No card data found";
+      data.length > 0
+        ? `${data.length} credit card data found`
+        : "No credit card data found";
     return res.send({ message, data });
   } catch (e) {
     return res.json({ e, message: "Something went wrong", status: 500 });

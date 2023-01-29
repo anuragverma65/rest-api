@@ -1,17 +1,9 @@
-import express from "express";
-
+import { app } from "./app";
 import knex from "./database/knex";
-import { router } from "./routes";
-
-const app = express();
 
 const PORT = 5000;
 
 start_server();
-
-app.use(express.json());
-
-app.use("/api/v1", router);
 
 async function start_server() {
   try {
