@@ -71,7 +71,7 @@ export const deleteCard = async (req: Request, res: Response) => {
       });
     }
     const message = "card details deleted successfully!";
-    return res.send({ message, data });
+    return res.send({ message, id });
   } catch (e) {
     return res.json({ e, message: "Something went wrong", status: 500 });
   }
