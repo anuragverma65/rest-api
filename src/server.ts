@@ -23,7 +23,7 @@ app.get("/", async (_req: Request, res: Response) => {
   return res.send("Rest API is operational!");
 });
 
-app.get("/add", async (req: Request, res: Response) => {
+app.post("/add", async (req: Request, res: Response) => {
   const id = uuidv4();
   try {
     const data = await knex<CreditCard>("credit_cards")
@@ -49,6 +49,62 @@ app.get("/add", async (req: Request, res: Response) => {
 app.get("/get-all", async (_req: Request, res: Response) => {
   try {
     const data = await knex("credit_cards");
+    const message =
+      data.length > 0 ? `${data.length} card data found` : "No card data found";
+    return res.send({ message, data });
+  } catch (e) {
+    return res.send({
+      e,
+      message: "Something went wrong",
+      status: 500,
+    });
+  }
+});
+
+app.patch("/update", async (req: Request, res: Response) => {
+  try {
+    const id = req.body.id;
+    const limit = req.body.limit;
+    const data = await knex<CreditCard>("credit_cards")
+      .update({ limit })
+      .where("id", id)
+      .returning("limit");
+    const message = "card limit updated successfully!";
+    return res.send({ message, data });
+  } catch (e) {
+    return res.send({
+      e,
+      message: "Something went wrong",
+      status: 500,
+    });
+  }
+});
+
+app.delete("/delete", async (req: Request, res: Response) => {
+  const id = req.body.id;
+  try {
+    const data = await knex<CreditCard>("credit_cards")
+      .where("id", id)
+      .del()
+      .returning("id");
+    const message = "card details deleted successfully!";
+    return res.send({ message, data });
+  } catch (e) {
+    return res.send({
+      e,
+      message: "Something went wrong",
+      status: 500,
+    });
+  }
+});
+
+// Add paginatated route to serve limited data. Default is set to 10
+app.get("/get-cards", async (req: Request, res: Response) => {
+  const id = req.body.id;
+  const dataLimit = (req.query.limit as number | undefined) || 10;
+  const dataOffset = req.query.offset as unknown as number;
+  try {
+    const data = await knex("credit_cards").limit(dataLimit).offset(dataOffset);
     const message =
       data.length > 0 ? `${data.length} card data found` : "No card data found";
     return res.send({ message, data });
