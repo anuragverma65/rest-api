@@ -72,5 +72,12 @@ export const validateDeleteInput = () => {
 
 // only validating limit as ideally no other data points should be updated
 export const validateUpdateInput = () => {
-  return [body("limit").optional().isNumeric()];
+  return [
+    body("limit").optional().isNumeric(),
+    body("id")
+      .notEmpty()
+      .withMessage("card id cant be blank")
+      .isUUID()
+      .withMessage("Invalid card id"),
+  ];
 };
