@@ -2,7 +2,8 @@ import {
   addCard,
   CreditCard,
   deleteCard,
-  findCard,
+  findCardbyCardNumber,
+  findCardbyId,
   getAllCardsFromDb,
   getPaginatedCardsFromDb,
   updateCardLimit,
@@ -23,7 +24,7 @@ export const updateCardService = async (
   id: string,
   limit: number
 ): Promise<Number | null> => {
-  const card = await findCard(id);
+  const card = await findCardbyId(id);
   if (!card) {
     return null;
   }
@@ -31,7 +32,7 @@ export const updateCardService = async (
 };
 
 export const deleteCardService = async (id: string): Promise<string | null> => {
-  const card = await findCard(id);
+  const card = await findCardbyId(id);
   if (!card) {
     return null;
   }
@@ -41,5 +42,9 @@ export const deleteCardService = async (id: string): Promise<string | null> => {
 export const addCardService = async (
   creditCardInput: CreditCard
 ): Promise<string[]> => {
+  const card = await findCardbyCardNumber(creditCardInput.card_number);
+  if (card) {
+    return [];
+  }
   return await addCard(creditCardInput);
 };

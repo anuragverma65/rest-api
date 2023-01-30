@@ -19,6 +19,12 @@ export const addCard = async (req: Request, res: Response) => {
       linked_user_full_name: req.body.linked_user_full_name,
     };
     const data = await addCardService(dataToUpdate); // only return the uuid so as to not expose PII unless needed
+    if (data.length === 0) {
+      return res.send({
+        message: "credit card details already present in the system",
+        status: 400,
+      });
+    }
     return res.send({
       data,
       message: "credit card details added successfully",
