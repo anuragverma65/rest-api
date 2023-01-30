@@ -26,7 +26,11 @@ describe("POST API", () => {
     const res = await request(app).post("/api/v1/add").send(validData);
     expect(res.body.status).toBe(200);
   });
-  it("should have data and 200 status when created with incorrect data", async () => {
+  it("should have 400 status when created with already present data", async () => {
+    const res = await request(app).post("/api/v1/add").send(validData);
+    expect(res.body.status).toBe(400);
+  });
+  it("should have 400 status when created with incorrect data", async () => {
     const res = await request(app).post("/api/v1/add").send(invalidData);
     expect(res.body.status).toBe(400);
   });
@@ -56,6 +60,15 @@ describe("GET API", () => {
     expect(res.body.message).toBe("1 credit card data found");
     expect(res.body.data.length).toBe(1);
   });
+  it("should return 0 record if offset is set to 6", async () => {
+    const res = await request(app)
+      .get("/api/v1/get-cards?limit=3&offset=6")
+      .send();
+
+    expect(res.body).toHaveProperty("data");
+    expect(res.body.message).toBe("No credit card data found");
+    expect(res.body.data.length).toBe(0);
+  });
 });
 
 describe("PATCH API", () => {
@@ -66,6 +79,13 @@ describe("PATCH API", () => {
       id: card?.id,
     });
     expect(res.body.message).toBe("card limit updated successfully!");
+  });
+  it("should return card not in system if update is requested for card not in the system", async () => {
+    const res = await request(app).patch("/api/v1/update").send({
+      limit: 10000,
+      id: "eb103315-2269-4f33-a18b-23dbdb42b266",
+    });
+    expect(res.body.message).toBe("credit card not present in the system");
   });
 });
 
@@ -83,6 +103,14 @@ describe("DELETE API", () => {
       id: "c98bde5f-3d99-4a85-98a5-6aa6f8800872",
     });
     expect(res.body.message).toBe("credit card not present in the system");
+  });
+});
+
+describe("Knex - Check rollback works", () => {
+  it("should rollback the migrations successfully", async () => {
+    const t = await knex.migrate.rollback();
+
+    expect(t[1].length).toBeGreaterThan(0);
   });
 });
 

@@ -63,7 +63,7 @@ Nyc has been set to provide coverage on test runs. Current coverage stands at
 ```
 | % Stmts | % Branch | % Funcs | % Lines |
 |---------|----------|---------|---------|
-|   94.56 |    83.33 |   93.47 |   93.28 |
+|   100   |    100   |   100   |   100   |
 ```
 
 # Author
