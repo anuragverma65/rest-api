@@ -1,4 +1,5 @@
 import { body, query } from "express-validator";
+import { removeCardNumberFormatting } from "../utils";
 
 /*
 The Luhn Algorithm
@@ -16,7 +17,7 @@ export const validCreditCard = (value: string): boolean => {
   // accept only digits, dashes or spaces
   if (/[^0-9-\s]+/.test(value)) return false;
 
-  const digits = value.replace(/\D/g, "").split("").map(Number);
+  const digits = removeCardNumberFormatting(value);
   if (digits.length > 19) return false;
   const checkSum = digits.reduce((acc, digit, index) => {
     if (index % 2 === 0) {

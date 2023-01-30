@@ -50,6 +50,6 @@ export const findCardbyId = async (id: string): Promise<CreditCard> => {
 
 export const findCardbyCardNumber = async (
   card_number: string
-): Promise<CreditCard> => {
+): Promise<CreditCard | undefined> => {
   return await knex("credit_cards").where("card_number", card_number).first();
 };

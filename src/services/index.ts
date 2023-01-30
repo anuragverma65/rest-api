@@ -8,6 +8,7 @@ import {
   getPaginatedCardsFromDb,
   updateCardLimit,
 } from "../dal";
+import { getSanitizedCardNumber } from "../utils";
 
 export const getPaginatedCardsService = async (
   limit: number,
@@ -42,9 +43,15 @@ export const deleteCardService = async (id: string): Promise<string | null> => {
 export const addCardService = async (
   creditCardInput: CreditCard
 ): Promise<string[]> => {
-  const card = await findCardbyCardNumber(creditCardInput.card_number);
+  const sanitizedCardNumber = getSanitizedCardNumber(
+    creditCardInput.card_number
+  );
+  const card = await findCardbyCardNumber(sanitizedCardNumber);
   if (card) {
     return [];
   }
-  return await addCard(creditCardInput);
+  return await addCard({
+    ...creditCardInput,
+    card_number: sanitizedCardNumber,
+  });
 };
