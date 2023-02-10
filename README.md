@@ -54,7 +54,7 @@ Built With
 
 # API Documentation
 
-[Postman Collection](https://documenter.getpostman.com/view/25563665/2s935hQmXa)
+[Postman Collection](https://documenter.getpostman.com/view/25563665/2s935soN5A)
 
 # Test Coverage
 
